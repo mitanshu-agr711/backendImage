@@ -6,8 +6,6 @@ import{ Image } from '../model/image.model.js';
 import auth from '../middleware/user.middleware.js';
 import express from 'express';
 const router = express.Router();
-import { Folder } from '../model/folder.model.js';
-import mongoose from 'mongoose';
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -69,6 +67,29 @@ router.post('/upImage', auth, upload.single('image'), async (req, res) => {
   })
 
 
+
+  router.get('/search', auth, async (req, res) => {
+    try {
+      const { query } = req.query;
+    //   console.log("Search query:", query);
+      if (!query || query.trim() === '') {
+          return res.status(400).json({ error: 'Search query is required' });
+        }
+      
+      const images = await Image.find({
+        name: { $regex: query, $options: 'i' },
+        user: req.user.userId
+      });
+      if(!images || images.length === 0) {
+        return res.status(404).json({ message: 'No images found with this name' });
+      }
+      
+      res.json(images);
+    } catch (error) {
+      res.status(500).json({ error: 'Server error',error:error.message });
+    }
+  });
+
 router.get('/:folderId', auth, async (req, res) => {
   try {
     // console.log("Folder ID:", req.params.folderId);
@@ -83,22 +104,6 @@ router.get('/:folderId', auth, async (req, res) => {
   }
 });
 
-router.get('/search', auth, async (req, res) => {
-  try {
-    const { query } = req.query;
-    
-    if (!query) {
-      return res.status(400).json({ error: 'Search query is required' });
-    }
-    
-    const images = await Image.find({
-      name: { $regex: query, $options: 'i' },
-      user: req.user.userId
-    });
-    
-    res.json(images);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
+
+
 export default router;
