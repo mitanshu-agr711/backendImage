@@ -6,7 +6,8 @@ import{ Image } from '../model/image.model.js';
 import auth from '../middleware/user.middleware.js';
 import express from 'express';
 const router = express.Router();
-
+import { Folder } from '../model/folder.model.js';
+import mongoose from 'mongoose';
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -37,28 +38,36 @@ const upload = multer({
   }
 });
 
-
 router.post('/upImage', auth, upload.single('image'), async (req, res) => {
-  try {
-    const { name, folder } = req.body;
-    
-    if (!req.file) {
-      return res.status(400).json({ error: 'No image uploaded' });
+    try {
+    //   console.log(" Received Body:", req.body);
+    //   console.log(" Received File:", req.file);
+  
+      const { name, folderId } = req.body;
+  
+      
+      if (!req.file) {
+        return res.status(400).json({ error: 'No image uploaded' });
+      }
+  
+  
+     console.log("Folder found:", folderId);
+      const image = new Image({
+        name,
+        filename: req.file.filename,  
+        path: req.file.path,
+        folder: folderId, 
+        user: req.user.userId
+      });
+  
+      await image.save();
+      
+      res.status(201).json({ message: "Image uploaded successfully!", image });
+    } catch (error) {
+      console.error("Server Error:", error);
+      res.status(500).json({ error: 'Server error', details: error.message });
     }
-    
-    const image = new Image({
-      name,
-      path: req.file.path,
-      folder,
-      user: req.user.userId
-    });
-    
-    await image.save();
-    res.status(201).json(image);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error',error: error.message });
-  }
-});
+  })
 
 
 router.get('/folder/:folderId', auth, async (req, res) => {
