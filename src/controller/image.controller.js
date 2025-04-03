@@ -40,8 +40,7 @@ const upload = multer({
 
 router.post('/upImage', auth, upload.single('image'), async (req, res) => {
     try {
-    //   console.log(" Received Body:", req.body);
-    //   console.log(" Received File:", req.file);
+    
   
       const { name, folderId } = req.body;
   
@@ -70,8 +69,9 @@ router.post('/upImage', auth, upload.single('image'), async (req, res) => {
   })
 
 
-router.get('/folder/:folderId', auth, async (req, res) => {
+router.get('/:folderId', auth, async (req, res) => {
   try {
+    // console.log("Folder ID:", req.params.folderId);
     const images = await Image.find({ 
       folder: req.params.folderId,
       user: req.user.userId 
@@ -79,7 +79,7 @@ router.get('/folder/:folderId', auth, async (req, res) => {
     
     res.json(images);
   } catch (error) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Server error' ,error:error.message});
   }
 });
 
