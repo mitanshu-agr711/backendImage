@@ -29,4 +29,4 @@ const imageSchema = new mongoose.Schema({
 imageSchema.index({ name: 'text' });
 imageSchema.index({ user: 1, folder: 1 });
 
-module.exports = mongoose.model('Image', imageSchema);
+export const Image = mongoose.model('Image', imageSchema);
