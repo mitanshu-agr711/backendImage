@@ -68,7 +68,7 @@ router.post('/upImage', auth, upload.single('image'), async (req, res) => {
 
 
 
-  router.get('/search', auth, async (req, res) => {
+router.get('/search', auth, async (req, res) => {
     try {
       const { query } = req.query;
     //   console.log("Search query:", query);
